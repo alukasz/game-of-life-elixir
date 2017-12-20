@@ -3,7 +3,8 @@ defmodule GameOfLife.Application do
 
   def start(_type, _args) do
     children = [
-      {Registry, keys: :unique, name: GameOfLife.CellsRegistry}
+      {Registry, keys: :unique, name: GameOfLife.CellRegistry},
+      GameOfLife.CellSupervisor
     ]
     opts = [
       strategy: :one_for_one,

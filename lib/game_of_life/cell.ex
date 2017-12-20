@@ -1,7 +1,7 @@
 defmodule GameOfLife.Cell do
   use GenServer
 
-  @registry GameOfLife.CellsRegistry
+  @registry GameOfLife.CellRegistry
 
   def start_link(_, {_, _} = coords) do
     GenServer.start_link(__MODULE__, coords, name: via_tuple(coords))
