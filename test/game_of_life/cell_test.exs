@@ -6,7 +6,7 @@ defmodule GameOfLife.CellTest do
   test "get/1 returns cell by coordinates" do
     coords = {1, 2}
 
-    {:ok, pid} = Cell.start_link(coords)
+    {:ok, pid} = Cell.start_link([], coords)
 
     assert Cell.get(coords) == {:ok, pid}
   end

@@ -3,7 +3,7 @@ defmodule GameOfLife.Cell do
 
   @registry GameOfLife.CellsRegistry
 
-  def start_link({_, _} = coords) do
+  def start_link(_, {_, _} = coords) do
     GenServer.start_link(__MODULE__, coords, name: via_tuple(coords))
   end
 
