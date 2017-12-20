@@ -7,6 +7,7 @@ defmodule GameOfLife.Mixfile do
       version: "0.1.0",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
+      aliases: aliases(),
       deps: deps()
     ]
   end
@@ -20,5 +21,11 @@ defmodule GameOfLife.Mixfile do
 
   defp deps do
     []
+  end
+
+  defp aliases do
+    [
+      test: "test --no-start"
+    ]
   end
 end
