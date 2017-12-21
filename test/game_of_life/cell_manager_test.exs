@@ -23,7 +23,7 @@ defmodule GameOfLife.CellManagerTest do
   end
 
 
-  test "start_cells/1 created cells are dead by default" do
+  test "start_cells/1 created cells are dead when not specified as live" do
     board = %Board{width: 1, height: 1}
 
     assert CellManager.start_cells(board)
@@ -31,8 +31,8 @@ defmodule GameOfLife.CellManagerTest do
     assert :dead = Cell.state({0, 0})
   end
 
-  test "start_cells/1 sets alive cells" do
-    board = %Board{width: 1, height: 1, alive: [{0, 0}]}
+  test "start_cells/1 sets live cells" do
+    board = %Board{width: 1, height: 1, live: [{0, 0}]}
 
     assert CellManager.start_cells(board)
 

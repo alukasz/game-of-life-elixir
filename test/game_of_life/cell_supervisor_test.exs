@@ -14,7 +14,7 @@ defmodule GameOfLife.CellSupervisorTest do
   test "start_child/1 starts new cell", %{sup: sup} do
     coords = {1, 2}
 
-    assert {:ok, pid} = CellSupervisor.start_cell(%Board{}, coords)
+    assert {:ok, pid} = CellSupervisor.start_cell(%Board{}, coords, :live)
 
     assert pid in Enum.map(Supervisor.which_children(sup), &elem(&1, 1))
   end

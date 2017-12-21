@@ -5,8 +5,8 @@ defmodule GameOfLife.CellSupervisor do
     Supervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  def start_cell(board, coords) do
-    Supervisor.start_child(__MODULE__, [[board, coords]])
+  def start_cell(board, coords, state) do
+    Supervisor.start_child(__MODULE__, [[board, coords, state]])
   end
 
   def init(_) do

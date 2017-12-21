@@ -9,8 +9,8 @@ defmodule GameOfLife.Cell do
     defstruct [:coords, state: :dead, time: 0, neighbours: [], history: []]
   end
 
-  def start_link(_, [%Board{} = board, {_, _} = coords]) do
-    args = [coords, neighbours(coords, board)]
+  def start_link(_, [%Board{} = board, {_, _} = coords, state]) do
+    args = [coords, state, neighbours(coords, board)]
     GenServer.start_link(__MODULE__, args, name: via_tuple(coords))
   end
 
@@ -32,20 +32,12 @@ defmodule GameOfLife.Cell do
     GenServer.call(via_tuple(coords), :state)
   end
 
-  def set_state(coords, state) when state in [:live, :dead] do
-    GenServer.call(via_tuple(coords), {:set_state, state})
-  end
-
-
-  def init([coords, neighbours]) do
-    {:ok, %State{coords: coords, neighbours: neighbours}}
+  def init([coords, state, neighbours]) do
+    {:ok, %State{coords: coords, state: state, neighbours: neighbours}}
   end
 
   def handle_call(:state, _, %{state: state} = cell) do
     {:reply, state, cell}
-  end
-  def handle_call({:set_state, state}, _, cell) do
-    {:reply, {:ok, state}, %State{cell | state: state}}
   end
 
   defp via_tuple(coords) do
