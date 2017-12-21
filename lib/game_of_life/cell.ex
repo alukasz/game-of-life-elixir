@@ -2,11 +2,13 @@ defmodule GameOfLife.Cell do
   use GenServer
 
   alias GameOfLife.Board
+  alias GameOfLife.Rules
 
   @registry GameOfLife.CellRegistry
+  @period Application.get_env(:game_of_life, :period)
 
   defmodule State do
-    defstruct [:coords, state: :dead, time: 0, neighbours: [], history: []]
+    defstruct [:coords, time: 0, neighbours: [], history: []]
   end
 
   def start_link(_, [%Board{} = board, {_, _} = coords, state]) do
@@ -33,8 +35,9 @@ defmodule GameOfLife.Cell do
   end
 
   def init([coords, state, neighbours]) do
-    {:ok, %State{coords: coords, state: state,
-                 neighbours: neighbours, history: [{0, state}]}}
+    schedule()
+    {:ok, %State{coords: coords, neighbours: neighbours,
+                 history: [{0, state}]}}
   end
 
   def handle_call({:state, time}, _, %{time: time, state: state} = cell) do
@@ -46,10 +49,39 @@ defmodule GameOfLife.Cell do
     {:reply, state, cell}
   end
 
+  def handle_info(:next, %{time: time} = cell) do
+    schedule()
+    neighbours_alive(cell.neighbours, time)
+
+    {:noreply, %{cell | time: time + 1}}
+  end
+  def handle_info({:neighbours, live, time}, %{history: history} = cell) do
+    history = [{time + 1, Rules.next_state(state_at(history, time), live)} | history]
+
+    {:noreply, %{cell | history: history}}
+  end
+
+  defp neighbours_alive(neighbours, time) do
+    pid = self()
+    spawn_link fn ->
+      live = Enum.reduce neighbours, 0, fn neighbour, live ->
+        case state(neighbour, time) do
+          :live -> live + 1
+          :dead -> live
+        end
+      end
+      send(pid, {:neighbours, live, time})
+    end
+  end
+
   defp via_tuple(coords) do
     {:via, Registry, {@registry, coords}}
   end
 
   defp state_at([{time, state} | _], time), do: state
   defp state_at([_ | history], time), do: state_at(history, time)
+
+  defp schedule do
+    Process.send_after(self(), :next, @period)
+  end
 end

@@ -1,3 +1,3 @@
 defmodule GameOfLife.Board do
-  defstruct width: 10, height: 10, cells: [], live: []
+  defstruct width: 0, height: 0, cells: [], live: []
 end

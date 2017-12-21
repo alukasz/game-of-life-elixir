@@ -4,6 +4,8 @@ defmodule GameOfLife.Printer do
   alias GameOfLife.Board
   alias GameOfLife.Cell
 
+  @period Application.get_env(:game_of_life, :period)
+
   def start_link(_) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
@@ -54,6 +56,6 @@ defmodule GameOfLife.Printer do
   end
 
   defp schedule do
-    Process.send_after(self(), :print, :timer.seconds(1))
+    Process.send_after(self(), :print, @period)
   end
 end
