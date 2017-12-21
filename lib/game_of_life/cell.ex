@@ -6,7 +6,7 @@ defmodule GameOfLife.Cell do
   @registry GameOfLife.CellRegistry
 
   defmodule State do
-    defstruct [:coords, :state, time: 0, neighbours: [], history: []]
+    defstruct [:coords, state: :dead, time: 0, neighbours: [], history: []]
   end
 
   def start_link(_, [%Board{} = board, {_, _} = coords]) do
@@ -21,15 +21,31 @@ defmodule GameOfLife.Cell do
     end
   end
 
-  def get({_, _} = coords) do
+  def get(coords) do
     case Registry.lookup(@registry, coords) do
       [{pid, _}] -> {:ok, pid}
       _ -> {:error, :not_exists}
     end
   end
 
+  def state(coords) do
+    GenServer.call(via_tuple(coords), :state)
+  end
+
+  def set_state(coords, state) when state in [:live, :dead] do
+    GenServer.call(via_tuple(coords), {:set_state, state})
+  end
+
+
   def init([coords, neighbours]) do
     {:ok, %State{coords: coords, neighbours: neighbours}}
+  end
+
+  def handle_call(:state, _, %{state: state} = cell) do
+    {:reply, state, cell}
+  end
+  def handle_call({:set_state, state}, _, cell) do
+    {:reply, {:ok, state}, %State{cell | state: state}}
   end
 
   defp via_tuple(coords) do
