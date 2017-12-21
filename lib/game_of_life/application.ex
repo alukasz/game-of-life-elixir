@@ -5,7 +5,8 @@ defmodule GameOfLife.Application do
     children = [
       {Registry, keys: :unique, name: GameOfLife.CellRegistry},
       GameOfLife.CellSupervisor,
-      GameOfLife.CellManager
+      GameOfLife.CellManager,
+      GameOfLife.Printer
     ]
     opts = [
       strategy: :one_for_one,
