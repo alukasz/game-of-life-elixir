@@ -28,8 +28,8 @@ defmodule GameOfLife.Cell do
     end
   end
 
-  def state(coords) do
-    GenServer.call(via_tuple(coords), :state)
+  def state(coords, time \\ 0) do
+    GenServer.call(via_tuple(coords), {:state, time})
   end
 
   def init([coords, state, neighbours]) do
@@ -37,11 +37,19 @@ defmodule GameOfLife.Cell do
                  neighbours: neighbours, history: [{0, state}]}}
   end
 
-  def handle_call(:state, _, %{state: state} = cell) do
+  def handle_call({:state, time}, _, %{time: time, state: state} = cell) do
+    {:reply, state, cell}
+  end
+  def handle_call({:state, time}, _, %{history: history} = cell) do
+    state = state_at(history, time)
+
     {:reply, state, cell}
   end
 
   defp via_tuple(coords) do
     {:via, Registry, {@registry, coords}}
   end
+
+  defp state_at([{time, state} | _], time), do: state
+  defp state_at([_ | history], time), do: state_at(history, time)
 end
