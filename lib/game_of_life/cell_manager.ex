@@ -2,6 +2,7 @@ defmodule GameOfLife.CellManager do
   use GenServer
 
   alias GameOfLife.Board
+  alias GameOfLife.Cell
   alias GameOfLife.CellSupervisor
 
   def start_link(_) do
@@ -16,11 +17,33 @@ defmodule GameOfLife.CellManager do
     {:ok, %{}}
   end
 
-  def handle_call({:start_cells, %{width: w, height: h} = board}, _, state) do
-    for x <- 1..w, y <- 1..h do
-      CellSupervisor.start_cell(board, {x - 1, y - 1})
+  def handle_call({:start_cells,  board}, _, state) do
+    board =
+      board
+      |> do_start_cells()
+      |> initialize_cells()
+
+    {:reply, board, state}
+  end
+
+  defp do_start_cells(%{width: width, height: height} = board) do
+    cells = for x <- 1..width, y <- 1..height do
+      coords = {x - 1, y - 1}
+      {:ok, _} = CellSupervisor.start_cell(board, coords)
+
+      coords
     end
 
-    {:reply, :ok, state}
+    %{board | cells: cells}
+  end
+
+  defp initialize_cells(%{alive: alive} = board) do
+    Enum.each(alive, &turn_cell_alive/1)
+
+    board
+  end
+
+  defp turn_cell_alive(coords) do
+    Cell.set_state(coords, :live)
   end
 end
