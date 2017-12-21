@@ -33,7 +33,8 @@ defmodule GameOfLife.Cell do
   end
 
   def init([coords, state, neighbours]) do
-    {:ok, %State{coords: coords, state: state, neighbours: neighbours}}
+    {:ok, %State{coords: coords, state: state,
+                 neighbours: neighbours, history: [{0, state}]}}
   end
 
   def handle_call(:state, _, %{state: state} = cell) do
