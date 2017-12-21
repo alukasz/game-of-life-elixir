@@ -2,9 +2,11 @@ defmodule GameOfLife.CellSupervisorTest do
   use ExUnit.Case
 
   alias GameOfLife.CellSupervisor
+  alias GameOfLife.Board
 
   setup do
     {:ok, pid} = start_supervised(CellSupervisor)
+
 
     {:ok, sup: pid}
   end
@@ -12,7 +14,7 @@ defmodule GameOfLife.CellSupervisorTest do
   test "start_child/1 starts new cell", %{sup: sup} do
     coords = {1, 2}
 
-    assert {:ok, pid} = CellSupervisor.start_cell(coords)
+    assert {:ok, pid} = CellSupervisor.start_cell(%Board{}, coords)
 
     assert pid in Enum.map(Supervisor.which_children(sup), &elem(&1, 1))
   end

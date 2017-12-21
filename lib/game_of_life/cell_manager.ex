@@ -18,7 +18,7 @@ defmodule GameOfLife.CellManager do
 
   def handle_call({:start_cells, %{width: w, height: h} = board}, _, state) do
     for x <- 1..w, y <- 1..h do
-      CellSupervisor.start_cell({x - 1, y - 1})
+      CellSupervisor.start_cell(board, {x - 1, y - 1})
     end
 
     {:reply, :ok, state}
