@@ -9,7 +9,7 @@ defmodule GameOfLife.Cell do
   @period Application.get_env(:game_of_life, :period)
 
   defmodule State do
-    defstruct [:coords, time: 0, neighbours: [], history: []]
+    defstruct [:coords, time: 0, neighbours: [], history: [], requests: []]
   end
 
   def start_link(_, [%Board{} = board, {_, _} = coords, state]) do
@@ -44,10 +44,14 @@ defmodule GameOfLife.Cell do
   def handle_call({:state, time}, _, %{time: time, state: state} = cell) do
     {:reply, state, cell}
   end
-  def handle_call({:state, time}, _, %{history: history} = cell) do
-    state = state_at(history, time)
+  def handle_call({:state, time}, from, %{history: history} = cell) do
+    case state_at(history, time) do
+      :future ->
+        {:noreply, %{cell | requests: [{from, time} | cell.requests]}}
 
-    {:reply, state, cell}
+      state ->
+        {:reply, state, cell}
+    end
   end
 
   def handle_info(:next, %{time: time} = cell) do
@@ -57,15 +61,34 @@ defmodule GameOfLife.Cell do
     {:noreply, %{cell | time: time + 1}}
   end
   def handle_info({:neighbours, live, time}, %{history: history} = cell) do
-    history = [{time + 1, Rules.next_state(state_at(history, time), live)} | history]
+    state = Rules.next_state(state_at(history, time), live)
+    history = [{time + 1, state} | history]
+    requests = check_requests(cell.requests, history)
 
-    {:noreply, %{cell | history: history}}
+    {:noreply, %{cell | history: history, requests: requests}}
+  end
+
+  defp check_requests([], _), do: []
+  defp check_requests(requests, history) do
+    {_, to_send} = Enum.split_with requests, fn {from, time} ->
+      case state_at(history, time) do
+        :future ->
+          false
+
+        state ->
+          GenServer.reply(from, state)
+          true
+      end
+    end
+
+    to_send
   end
 
   defp via_tuple(coords) do
     {:via, Registry, {@registry, coords}}
   end
 
+  defp state_at([], _), do: :future
   defp state_at([{time, state} | _], time), do: state
   defp state_at([_ | history], time), do: state_at(history, time)
 
