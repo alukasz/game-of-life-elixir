@@ -3,6 +3,7 @@ defmodule GameOfLife.Cell do
 
   alias GameOfLife.Board
   alias GameOfLife.Rules
+  alias GameOfLife.Neighbours
 
   @registry GameOfLife.CellRegistry
   @period Application.get_env(:game_of_life, :period)
@@ -51,7 +52,7 @@ defmodule GameOfLife.Cell do
 
   def handle_info(:next, %{time: time} = cell) do
     schedule()
-    neighbours_alive(cell.neighbours, time)
+    Neighbours.count(self(), cell.neighbours, time)
 
     {:noreply, %{cell | time: time + 1}}
   end
@@ -59,19 +60,6 @@ defmodule GameOfLife.Cell do
     history = [{time + 1, Rules.next_state(state_at(history, time), live)} | history]
 
     {:noreply, %{cell | history: history}}
-  end
-
-  defp neighbours_alive(neighbours, time) do
-    pid = self()
-    spawn_link fn ->
-      live = Enum.reduce neighbours, 0, fn neighbour, live ->
-        case state(neighbour, time) do
-          :live -> live + 1
-          :dead -> live
-        end
-      end
-      send(pid, {:neighbours, live, time})
-    end
   end
 
   defp via_tuple(coords) do

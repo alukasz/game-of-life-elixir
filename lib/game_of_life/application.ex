@@ -6,7 +6,9 @@ defmodule GameOfLife.Application do
       {Registry, keys: :unique, name: GameOfLife.CellRegistry},
       GameOfLife.CellSupervisor,
       GameOfLife.CellManager,
-      GameOfLife.Printer
+      GameOfLife.Printer,
+      {Task.Supervisor, name: GameOfLife.NeighboursCounterSupervisor,
+                        restart: :transient}
     ]
     opts = [
       strategy: :one_for_one,
