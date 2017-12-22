@@ -24,7 +24,6 @@ defmodule GameOfLife.CellManager do
   end
 
   defp do_start_cells(%{width: width, height: height} = board) do
-    Timer.start_timer()
     cells = for y <- 1..height, x <- 1..width do
       coords = {x - 1, y - 1}
       state = initial_state(coords, board)
@@ -32,6 +31,7 @@ defmodule GameOfLife.CellManager do
 
       coords
     end
+    Timer.start_timer()
 
     %{board | cells: cells}
   end
