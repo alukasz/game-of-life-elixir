@@ -14,24 +14,17 @@ defmodule GameOfLife.Printer do
     GenServer.call(__MODULE__, {:print, board})
   end
 
-  def sort_cells(%{cells: cells, width: width} = board) do
-    mapper = fn {x, y} -> y * width + x end
-    cells = Enum.sort_by(cells, mapper, &<=/2)
-
-    %{board | cells: cells}
-  end
-
   def init(_) do
     {:ok, %{board: %Board{}, time: 0}}
   end
 
-  def handle_call({:print, %{cells: cells} = board}, _, state) do
+  def handle_call({:print, board}, _, state) do
     schedule_printing()
 
-    {:reply, :ok, %{state | board: sort_cells(board)}}
+    {:reply, :ok, %{state | board: board, time: 0}}
   end
 
-  def handle_info(:print, %{board: board, time: time} = state) do
+  def handle_info(:do_print, %{board: board, time: time} = state) do
     schedule()
     do_print(board, time)
 
@@ -52,10 +45,10 @@ defmodule GameOfLife.Printer do
   end
 
   defp schedule_printing do
-    Process.send_after(self(), :print, :timer.seconds(3))
+    Process.send_after(self(), :do_print, :timer.seconds(2))
   end
 
   defp schedule do
-    Process.send_after(self(), :print, @period)
+    Process.send_after(self(), :do_print, @period)
   end
 end

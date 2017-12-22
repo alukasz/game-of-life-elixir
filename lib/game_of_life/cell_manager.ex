@@ -23,7 +23,7 @@ defmodule GameOfLife.CellManager do
   end
 
   defp do_start_cells(%{width: width, height: height} = board) do
-    cells = for x <- 1..width, y <- 1..height do
+    cells = for y <- 1..height, x <- 1..width do
       coords = {x - 1, y - 1}
       state = initial_state(coords, board)
       {:ok, _} = CellSupervisor.start_cell(board, coords, state)
