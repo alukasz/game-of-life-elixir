@@ -20,5 +20,3 @@ gosper_cells = [
 ] |> Enum.map(fn {x, y} -> {x, y + 10} end)
 
 gosper = %GameOfLife.Board{width: 50, height: 20, live: gosper_cells}
-
-:observer.start
