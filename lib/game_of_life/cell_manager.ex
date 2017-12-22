@@ -3,6 +3,7 @@ defmodule GameOfLife.CellManager do
 
   alias GameOfLife.Board
   alias GameOfLife.CellSupervisor
+  alias GameOfLife.Timer
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -23,6 +24,7 @@ defmodule GameOfLife.CellManager do
   end
 
   defp do_start_cells(%{width: width, height: height} = board) do
+    Timer.start_timer()
     cells = for y <- 1..height, x <- 1..width do
       coords = {x - 1, y - 1}
       state = initial_state(coords, board)

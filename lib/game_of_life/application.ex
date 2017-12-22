@@ -7,6 +7,7 @@ defmodule GameOfLife.Application do
       GameOfLife.CellSupervisor,
       GameOfLife.CellManager,
       GameOfLife.Printer,
+      GameOfLife.Timer,
       {Task.Supervisor, name: GameOfLife.NeighboursCounterSupervisor,
                         restart: :transient}
     ]

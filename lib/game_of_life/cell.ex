@@ -4,6 +4,7 @@ defmodule GameOfLife.Cell do
   alias GameOfLife.Board
   alias GameOfLife.Rules
   alias GameOfLife.Neighbours
+  alias GameOfLife.Timer
 
   @registry GameOfLife.CellRegistry
   @period Application.get_env(:game_of_life, :period)
@@ -29,7 +30,15 @@ defmodule GameOfLife.Cell do
   end
 
   def init([coords, state, neighbours]) do
-    schedule()
+    case Timer.get() do
+      0 ->
+        schedule()
+
+      time ->
+        IO.inspect "forwarding #{time} generations"
+        fast_forward(0, time)
+    end
+
     {:ok, %State{coords: coords, neighbours: neighbours,
                  history: [{0, state}]}}
   end
@@ -60,6 +69,17 @@ defmodule GameOfLife.Cell do
 
     {:noreply, %{cell | history: history, requests: requests}}
   end
+  def handle_info({:fast_forward, time, time}, cell) do
+    schedule()
+
+    {:noreply, cell}
+  end
+  def handle_info({:fast_forward, time, until}, cell) do
+    fast_forward(time + 1, until)
+    Neighbours.count(self(), cell.neighbours, time)
+
+    {:noreply, %{cell | time: time + 1}}
+  end
 
   defp check_requests([], _), do: []
   defp check_requests(requests, history) do
@@ -87,5 +107,8 @@ defmodule GameOfLife.Cell do
 
   defp schedule do
     Process.send_after(self(), :next, @period)
+  end
+  defp fast_forward(from, until) do
+    send(self(), {:fast_forward, from, until})
   end
 end
