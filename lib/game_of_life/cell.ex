@@ -24,13 +24,6 @@ defmodule GameOfLife.Cell do
     end
   end
 
-  def get(coords) do
-    case Registry.lookup(@registry, coords) do
-      [{pid, _}] -> {:ok, pid}
-      _ -> {:error, :not_exists}
-    end
-  end
-
   def state(coords, time \\ 0) do
     GenServer.call(via_tuple(coords), {:state, time})
   end
@@ -61,8 +54,8 @@ defmodule GameOfLife.Cell do
     {:noreply, %{cell | time: time + 1}}
   end
   def handle_info({:neighbours, live, time}, %{history: history} = cell) do
-    state = Rules.next_state(state_at(history, time), live)
-    history = [{time + 1, state} | history]
+    next_state = Rules.next_state(state_at(history, time), live)
+    history = [{time + 1, next_state} | history]
     requests = check_requests(cell.requests, history)
 
     {:noreply, %{cell | history: history, requests: requests}}

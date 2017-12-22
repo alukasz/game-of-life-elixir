@@ -12,18 +12,6 @@ defmodule GameOfLife.CellTest do
     assert Cell.state(coords) == :live
   end
 
-  test "get/1 returns cell by coordinates" do
-    coords = {1, 2}
-
-    {:ok, pid} = Cell.start_link([], [%Board{}, coords, :live])
-
-    assert Cell.get(coords) == {:ok, pid}
-  end
-
-  test "get/2 returns error tuple when cell doesn't exist" do
-    assert Cell.get({1, 2}) == {:error, :not_exists}
-  end
-
   describe "state/2" do
     setup do
       coords = {1, 2}
