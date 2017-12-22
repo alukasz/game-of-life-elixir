@@ -1,21 +1,33 @@
-# GameOfLife
+# Game of Life the Erlang way
 
-**TODO: Add description**
+Conway's Game of Life implemented using Elixir processes as cells. There is
+no "central point" which controls game. Each cell progress on it's own and communicates with other
+to determine it's next state (live or dead).
 
-## Installation
+Run with iex:
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `game_of_life` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:game_of_life, "~> 0.1.0"}
-  ]
-end
+```
+iex -S mix
+# there are 2 predefined examples in .iex.exs: glider and gosper
+GameOfLife.start(glider)
+# or
+GameOfLife.start(%GameOfLife.Board{width: 10, height: 10, live: [
+  {5, 4}, {5, 5}, {5, 6} # specify cells that are alive on start
+]})
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/game_of_life](https://hexdocs.pm/game_of_life).
+### How cells are kept in sync?
 
+There are 2 mechanism to allow asynchronous progress of cells.
+
+* Each cell doesn't hold it's current state but history of states from the
+  beginning. Cell can obtain other cell state at any point.
+
+* When cell gets a message for it's state in the future, the
+  request is saved. When cell progress, it replies to previously stored requests.
+
+### What if cell dies?
+
+* `GameOfLife.Timer` holds estimate of current game time. When cell is
+  created checks time and if needed, forwards it's evolution
+  to match other cells.
