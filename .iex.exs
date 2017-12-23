@@ -1,12 +1,10 @@
 import GameOfLife
 
-alias GameOfLife.Cell
-alias GameOfLife.CellManager
-alias GameOfLife.Printer
+alias GameOfLife.Board
 
-glider = %GameOfLife.Board{width: 20, height: 20, live: [{0, 1}, {1, 2}, {2, 2}, {2, 1}, {2, 0}]}
-glider_big = %GameOfLife.Board{width: 100, height: 100, live: [{0, 1}, {1, 2}, {2, 2}, {2, 1}, {2, 0}]}
+glider = %Board{width: 20, height: 20, live: [{0, 1}, {1, 2}, {2, 2}, {2, 1}, {2, 0}]}
 
+# from http://www.petecorey.com/blog/2017/02/06/playing-the-game-of-life-with-elixir-processes/
 gosper_cells = [
   {24, 8},
   {22, 7}, {24, 7},
@@ -19,4 +17,4 @@ gosper_cells = [
   {12, 0}, {13, 0},
 ] |> Enum.map(fn {x, y} -> {x, y + 10} end)
 
-gosper = %GameOfLife.Board{width: 50, height: 20, live: gosper_cells}
+gosper = %Board{width: 50, height: 20, live: gosper_cells}
